@@ -10,7 +10,7 @@ workflows:
         bundle_identifier: com.guideh.guideh
       vars:
         APP_ID: 6446485091 # <-- Put your APP ID here
-      flutter: 3.13.9
+      flutter: 3.27.0
       xcode: latest
       cocoapods: default
     scripts:
