@@ -1,0 +1,62 @@
+workflows:
+  ios-workflow:
+    name: iOS Workflow
+    max_build_duration: 120
+    integrations:
+      app_store_connect: Guideh iOS
+    environment:
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.guideh.guideh
+      vars:
+        APP_ID: 6446485091 # <-- Put your APP ID here
+      flutter: 3.13.9
+      xcode: latest
+      cocoapods: default
+    scripts:
+      - name: Set up code signing settings on Xcode project
+        script: |
+          xcode-project use-profiles
+      - name: Get Flutter packages
+        script: |
+          flutter packages pub get
+      - name: Install pods
+        script: |
+          find . -name "Podfile" -execdir pod install \;
+      - name: Flutter analyze
+        script: |
+          flutter analyze
+      # - name: Flutter unit tests
+      #   script: |
+      #     flutter test
+        ignore_failure: true
+      - name: Flutter build ipa and automatic versioning
+        script: |
+          flutter build ipa --release \
+            --build-name=1.2.6 \
+            --build-number=60 \
+            --export-options-plist=/Users/builder/export_options.plist
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+      - flutter_drive.log
+    publishing:
+      # See the following link for details about email publishing - https://docs.codemagic.io/publishing-yaml/distribution/#email
+      # email:
+        # recipients:
+        #   - ivan.demchuk.guideh@gmail.com
+        # notify:
+        #   success: true # To receive a notification when a build succeeds
+        #   failure: false # To not receive a notification when a build fails
+      app_store_connect:
+        auth: integration
+
+        # Configuration related to TestFlight (optional)
+        # Note: This action is performed during post-processing.
+        submit_to_testflight: true
+        beta_groups: # Specify the names of beta tester groups that will get access to the build once it has passed beta review.
+          - Main Testing Group
+
+        # Configuration related to App Store (optional)
+        # Note: This action is performed during post-processing.
+        submit_to_app_store: false
